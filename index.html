@@ -81,14 +81,15 @@
   import { initializeFirestore, doc, setDoc, getDoc, onSnapshot }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  // Stejný Firebase projekt jako SKLAD — přihlášení stejným účtem
+  // Samostatný projekt pro domácí/finanční aplikace (BTC Tracker je první z nich)
   const FIREBASE_CONFIG = {
-    apiKey: "AIzaSyDS1e4Y3LfglhKsLryxJZYqrfMSCZ9evnU",
-    authDomain: "sklad-7eec9.firebaseapp.com",
-    projectId: "sklad-7eec9",
-    storageBucket: "sklad-7eec9.firebasestorage.app",
-    messagingSenderId: "978342647746",
-    appId: "1:978342647746:web:7d783621becbd45b09685b"
+    apiKey: "AIzaSyBxbuMQBAs-oJu__753kETG6O_RWcOICUo",
+    authDomain: "domacnost-finance.firebaseapp.com",
+    projectId: "domacnost-finance",
+    storageBucket: "domacnost-finance.firebasestorage.app",
+    messagingSenderId: "872291993999",
+    appId: "1:872291993999:web:a7e6fa48c5c1d801ef23fa",
+    measurementId: "G-EEEL6SLRKS"
   };
 
   const app = initializeApp(FIREBASE_CONFIG);
@@ -108,7 +109,7 @@
 <div id="loginOverlay">
   <div class="login-box">
     <h1><span>₿</span> BTC Tracker</h1>
-    <p class="subtitle">Přihlas se stejným účtem jako do skladu</p>
+    <p class="subtitle">Přihlas se, nebo si poprvé vytvoř účet</p>
     <input type="email" id="loginEmail" placeholder="E-mail" autocomplete="username">
     <input type="password" id="loginPass" placeholder="Heslo" autocomplete="current-password">
     <div class="login-err" id="loginErr"></div>

@@ -10,15 +10,15 @@ Soukromá webová aplikace pro evidenci nákupů bitcoinu.
 - 📈 Grafy: naakumulované BTC v čase, investováno vs. hodnota dnes
 - ⬇ Export do CSV (podklad pro finanční úřad) a zálohování/obnova v JSON
 
-- ☁️ **Synchronizace přes Firebase** – stejný projekt a účet jako aplikace SKLAD, data dostupná na všech zařízeních (doma, práce, mobil); offline fallback na localStorage
+- ☁️ **Synchronizace přes Firebase** – vlastní projekt `domacnost-finance` (pro osobní domácí/finanční aplikace), data dostupná na všech zařízeních (doma, práce, mobil); offline fallback na localStorage
 - ⬆ **Import historie z Excelu** (.xlsx/.csv) s mapováním sloupců – aplikace sloupce sama rozpozná a chybějící údaje (cena/množství) doplní z historického kurzu BTC k datu nákupu (CoinGecko); doplněné hodnoty jsou označené jako ~odhad
 
 ## Použití
 
 Žádná instalace ani build – jediný `index.html`, hostovatelný na GitHub Pages.
 Data se ukládají do Firestore pod `users/{uid}/btc/data` (Firebase projekt
-`sklad-7eec9`, přihlášení stejným účtem jako do skladu) a zrcadlí se do
-localStorage. Pravidelně si dělej zálohu přes „Záloha JSON".
+`domacnost-finance`) a zrcadlí se do localStorage. Pravidelně si dělej zálohu
+přes „Záloha JSON".
 
 ### Import z Excelu
 
