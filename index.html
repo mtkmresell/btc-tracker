@@ -40,6 +40,7 @@
     background: linear-gradient(140deg, var(--accent), var(--accent2)); color: #1a1205; font-weight: 800; font-size: 1.25rem;
     box-shadow: 0 4px 16px rgba(247,147,26,.4); }
   .topbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 4px; flex-wrap: wrap; }
+  .topbar-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .subtitle { color: var(--muted); margin-bottom: 26px; font-size: .84rem; line-height: 1.5; }
   .userbox { display: flex; align-items: center; gap: 10px; font-size: .82rem; color: var(--muted);
     background: var(--card); border: 1px solid var(--card-brd); padding: 7px 12px; border-radius: 99px; }
@@ -61,7 +62,7 @@
   .panel { background: var(--card); border: 1px solid var(--card-brd); border-radius: var(--radius); padding: 22px; margin-bottom: 22px; backdrop-filter: blur(8px); }
   .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
   .panel-head h2 { margin-bottom: 0; }
-  form.add { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; align-items: end; }
+  .panel-head-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   label { display: block; font-size: .74rem; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
   input, select { width: 100%; padding: 11px 12px; background: rgba(0,0,0,.25); border: 1px solid var(--card-brd); border-radius: 10px; color: var(--text); font-size: .9rem; font-family: inherit; transition: border-color .15s ease, box-shadow .15s ease; }
   input::placeholder { color: var(--faint); }
@@ -71,7 +72,7 @@
   button:active { transform: translateY(1px); }
   button.ghost { background: var(--card); border: 1px solid var(--card-brd); color: var(--text); box-shadow: none; }
   button.ghost:hover { border-color: var(--card-hi); background: var(--card-hi); filter: none; }
-  button.danger { background: transparent; border: 1px solid rgba(255,107,107,.4); color: var(--red); padding: 5px 11px; font-size: .76rem; box-shadow: none; }
+  button.danger { background: transparent; border: 1px solid rgba(255,107,107,.4); color: var(--red); box-shadow: none; }
   button.danger:hover { background: rgba(255,107,107,.12); filter: none; box-shadow: none; }
   button:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; filter: none; }
 
@@ -83,20 +84,22 @@
 
   table { width: 100%; border-collapse: collapse; font-size: .87rem; }
   th { text-align: left; color: var(--muted); font-weight: 500; font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; padding: 10px 10px; border-bottom: 1px solid var(--card-brd); }
-  td { padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,.05); }
-  tbody tr { transition: background .12s ease; }
-  tbody tr:hover { background: rgba(255,255,255,.025); }
+  td { padding: 13px 10px; border-bottom: 1px solid rgba(255,255,255,.05); }
+  tbody tr { transition: background .12s ease; cursor: pointer; }
+  tbody tr:hover { background: rgba(255,255,255,.04); }
   tr:last-child td { border-bottom: none; }
   td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .badge { display: inline-block; padding: 4px 10px; border-radius: 99px; font-size: .72rem; font-weight: 600; white-space: nowrap; }
   .badge.ok { background: rgba(46,204,143,.14); color: var(--green); }
   .badge.wait { background: rgba(247,147,26,.14); color: var(--accent2); }
   .badge.est { background: rgba(139,147,161,.16); color: var(--muted); font-weight: 500; }
+  .badge.buy { background: rgba(247,147,26,.16); color: var(--accent2); }
+  .badge.sell { background: rgba(91,157,255,.16); color: var(--blue); }
+  .more-wrap { text-align: center; margin-top: 14px; }
 
   .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
   .chart-wrap { position: relative; height: 300px; }
   @media (max-width: 880px) { .charts { grid-template-columns: 1fr; } body { padding: 18px 14px 50px; } }
-  .toolbar { display: flex; gap: 10px; margin-bottom: 22px; flex-wrap: wrap; }
   .empty { color: var(--muted); text-align: center; padding: 36px; font-size: .9rem; }
   .chart-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   .chart-hint { font-size: .72rem; color: var(--faint); margin-top: 8px; text-align: right; }
@@ -133,12 +136,33 @@
   .dp-foot button { background: transparent; color: var(--accent2); border: none; padding: 4px 8px; font-size: .8rem; box-shadow: none; }
   .dp-foot button:hover { filter: none; box-shadow: none; text-decoration: underline; }
 
-  /* import modal */
-  #importModal { position: fixed; inset: 0; background: rgba(0,0,0,.65); backdrop-filter: blur(4px); z-index: 90; display: none; align-items: flex-start; justify-content: center; padding: 34px 14px; overflow-y: auto; }
-  .modal-box { background: #12151c; border: 1px solid var(--card-brd); border-radius: 18px; padding: 26px; width: 100%; max-width: 860px; box-shadow: var(--shadow); }
+  /* generic modal */
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,.65); backdrop-filter: blur(4px); z-index: 90; display: none; align-items: flex-start; justify-content: center; padding: 40px 14px; overflow-y: auto; }
+  .modal.open { display: flex; }
+  .modal-box { background: #12151c; border: 1px solid var(--card-brd); border-radius: 18px; padding: 26px; width: 100%; max-width: 520px; box-shadow: var(--shadow); }
+  .modal-box.wide { max-width: 860px; }
+  .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .modal-head h2 { margin-bottom: 0; }
+  .modal-x { background: transparent; color: var(--muted); border: none; font-size: 1.3rem; padding: 0 6px; box-shadow: none; }
+  .modal-x:hover { color: var(--text); filter: none; box-shadow: none; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-grid .full { grid-column: 1 / -1; }
+  @media (max-width: 480px) { .form-grid { grid-template-columns: 1fr; } }
+  .modal-foot { display: flex; gap: 10px; margin-top: 20px; }
   .map-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 16px 0; }
   .hint { font-size: .8rem; color: var(--muted); margin: 8px 0; line-height: 1.5; }
   .progress { font-size: .85rem; color: var(--accent2); margin-top: 8px; min-height: 20px; }
+
+  /* detail view */
+  .detail-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.06); font-size: .9rem; }
+  .detail-row:last-of-type { border-bottom: none; }
+  .detail-row .k { color: var(--muted); }
+  .detail-row .v { font-weight: 600; text-align: right; }
+
+  /* settings menu */
+  .menu-list { display: flex; flex-direction: column; gap: 10px; }
+  .menu-list button { width: 100%; text-align: left; }
+
   #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); opacity: 0; background: #12151c; border: 1px solid var(--card-brd); border-radius: 12px; padding: 13px 22px; font-size: .88rem; z-index: 200; box-shadow: var(--shadow); transition: opacity .25s ease, transform .25s ease; pointer-events: none; }
   #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
@@ -190,52 +214,41 @@
 
 <div class="topbar">
   <h1><span class="logo">₿</span> BTC Tracker</h1>
-  <div class="userbox">
-    <span class="dot" id="syncDot"></span><span id="userLabel">offline</span>
-    <button class="ghost" onclick="doLogout()" style="padding:4px 12px;font-size:.78rem;">Odhlásit</button>
+  <div class="topbar-actions">
+    <button class="ghost" onclick="openModal('settingsModal')" style="padding:8px 14px;">⚙ Nastavení</button>
+    <div class="userbox">
+      <span class="dot" id="syncDot"></span><span id="userLabel">offline</span>
+      <button class="ghost" onclick="doLogout()" style="padding:4px 12px;font-size:.78rem;">Odhlásit</button>
+    </div>
   </div>
 </div>
-<p class="subtitle">Evidence nákupů BTC · časový test 3 roky (§ 4 odst. 1 písm. x ZDP) · data synchronizovaná přes Firebase</p>
+<p class="subtitle">Evidence nákupů a prodejů BTC · časový test 3 roky (§ 4 odst. 1 písm. x ZDP) · data synchronizovaná přes Firebase</p>
 
 <div class="cards" id="cards"></div>
 
 <div class="panel">
-  <h2>➕ Nový nákup</h2>
-  <form class="add" id="addForm">
-    <div><label>Datum nákupu</label>
-      <div class="dp" id="datePicker">
-        <button type="button" class="dp-input" id="dpInput"><span id="dpLabel">—</span><span class="cal-ic">📅</span></button>
-        <div class="dp-pop" id="dpPop"></div>
-      </div>
-    </div>
-    <div><label>Množství BTC</label><input type="number" id="fAmount" step="any" min="0" placeholder="0.001" required></div>
-    <div><label>Zaplaceno (CZK)</label><input type="number" id="fPaid" step="any" min="0" placeholder="2500" required></div>
-    <div><label>Kde (burza/směnárna)</label><input type="text" id="fWhere" placeholder="Coinbase, Anycoin…"></div>
-    <div><label>Poznámka</label><input type="text" id="fNote" placeholder="volitelné"></div>
-    <div><button type="submit">Přidat nákup</button></div>
-  </form>
-</div>
-
-<div class="panel">
   <div class="panel-head">
-    <h2>📒 Nákupy</h2>
-    <div class="seg" id="sortSeg">
-      <button data-sort="desc" class="active">Nejnovější</button>
-      <button data-sort="asc">Nejstarší</button>
+    <h2>📒 Transakce</h2>
+    <div class="panel-head-tools">
+      <button onclick="openAdd()">➕ Přidat</button>
+      <div class="seg" id="sortSeg">
+        <button data-sort="desc" class="active">Nejnovější</button>
+        <button data-sort="asc">Nejstarší</button>
+      </div>
     </div>
   </div>
   <div style="overflow-x:auto">
     <table>
       <thead><tr>
-        <th>Datum</th><th>Kde</th>
-        <th class="num">BTC</th><th class="num">Zaplaceno</th><th class="num">Kurz při nákupu</th>
-        <th class="num">Hodnota dnes</th><th class="num">Zisk/ztráta</th>
-        <th>Časový test</th><th>Poznámka</th><th></th>
+        <th>Datum</th><th>Typ</th><th>Kde</th>
+        <th class="num">BTC</th><th class="num">Částka</th><th class="num">Kurz</th>
+        <th>Časový test</th>
       </tr></thead>
       <tbody id="rows"></tbody>
     </table>
   </div>
-  <div class="empty" id="empty" style="display:none">Zatím žádné nákupy. Přidej první nahoře, nebo importuj Excel dole 👇</div>
+  <div class="more-wrap" id="moreWrap"></div>
+  <div class="empty" id="empty" style="display:none">Zatím žádné transakce. Klikni na „➕ Přidat", nebo importuj Excel přes ⚙ Nastavení.</div>
 </div>
 
 <div class="charts">
@@ -244,7 +257,7 @@
       <h2>📈 Naakumulované BTC v čase</h2>
       <div class="chart-tools">
         <div class="seg" id="rangeSeg">
-          <button data-range="3" >3M</button>
+          <button data-range="3">3M</button>
           <button data-range="12">1R</button>
           <button data-range="36">3R</button>
           <button data-range="0" class="active">Vše</button>
@@ -262,27 +275,86 @@
   </div>
 </div>
 
-<div class="toolbar">
-  <button class="ghost" onclick="document.getElementById('xlsFile').click()">⬆ Import z Excelu (.xlsx/.csv)</button>
-  <input type="file" id="xlsFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="openImport(this)">
-  <button class="ghost" onclick="exportCsv()">⬇ Export CSV (pro finančák)</button>
-  <button class="ghost" onclick="exportJson()">⬇ Záloha JSON</button>
-  <button class="ghost" onclick="document.getElementById('importFile').click()">⬆ Obnovit ze zálohy JSON</button>
-  <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJson(this)">
-  <button class="ghost" onclick="enrichMissing()" id="btnEnrich">🪄 Doplnit chybějící údaje</button>
+<!-- Přidat / upravit transakci -->
+<div class="modal" id="txModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2 id="txTitle">Nová transakce</h2>
+      <button class="modal-x" onclick="closeModal('txModal')">✕</button>
+    </div>
+    <form id="txForm">
+      <div class="seg" id="txTypeSeg" style="margin-bottom:16px;">
+        <button type="button" data-type="buy" class="active">🟠 Nákup</button>
+        <button type="button" data-type="sell">🔵 Prodej</button>
+      </div>
+      <div class="form-grid">
+        <div class="full"><label>Datum</label>
+          <div class="dp" id="datePicker">
+            <button type="button" class="dp-input" id="dpInput"><span id="dpLabel">—</span><span class="cal-ic">📅</span></button>
+            <div class="dp-pop" id="dpPop"></div>
+          </div>
+        </div>
+        <div><label>Množství BTC</label><input type="number" id="fAmount" step="any" min="0" placeholder="0.001" required></div>
+        <div><label id="paidLabel">Zaplaceno (CZK)</label><input type="number" id="fPaid" step="any" min="0" placeholder="2500" required></div>
+        <div><label>Kde (burza/směnárna)</label><input type="text" id="fWhere" placeholder="Coinbase, Anycoin…"></div>
+        <div><label>Poznámka</label><input type="text" id="fNote" placeholder="volitelné"></div>
+      </div>
+      <div class="modal-foot">
+        <button type="submit" id="txSubmit">Přidat</button>
+        <button type="button" class="ghost" onclick="closeModal('txModal')">Zrušit</button>
+      </div>
+    </form>
+  </div>
 </div>
 
-<!-- Excel import: mapování sloupců -->
-<div id="importModal">
+<!-- Detail transakce -->
+<div class="modal" id="detailModal">
   <div class="modal-box">
-    <h2>📥 Import z Excelu</h2>
-    <p class="hint">Zkontroluj, který sloupec z tvého souboru odpovídá kterému údaji. Aplikace se pokusila sloupce poznat sama. Co v Excelu nevedeš, nech na „— nemám —" a aplikace si to doplní (kurz/cena podle historického kurzu BTC k datu nákupu).</p>
+    <div class="modal-head">
+      <h2>Detail transakce</h2>
+      <button class="modal-x" onclick="closeModal('detailModal')">✕</button>
+    </div>
+    <div id="detailBody"></div>
+    <div class="modal-foot">
+      <button class="ghost" id="detailEdit">✏ Upravit</button>
+      <button class="danger" id="detailDel">🗑 Smazat</button>
+    </div>
+  </div>
+</div>
+
+<!-- Nastavení -->
+<div class="modal" id="settingsModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2>⚙ Nastavení a data</h2>
+      <button class="modal-x" onclick="closeModal('settingsModal')">✕</button>
+    </div>
+    <div class="menu-list">
+      <button class="ghost" onclick="closeModal('settingsModal');document.getElementById('xlsFile').click()">⬆ Import z Excelu (.xlsx/.csv)</button>
+      <button class="ghost" onclick="closeModal('settingsModal');exportCsv()">⬇ Export CSV (pro finančák)</button>
+      <button class="ghost" onclick="closeModal('settingsModal');exportJson()">⬇ Záloha JSON</button>
+      <button class="ghost" onclick="closeModal('settingsModal');document.getElementById('importFile').click()">⬆ Obnovit ze zálohy JSON</button>
+      <button class="ghost" onclick="closeModal('settingsModal');enrichMissing()" id="btnEnrich">🪄 Doplnit chybějící údaje</button>
+    </div>
+  </div>
+</div>
+<input type="file" id="xlsFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="openImport(this)">
+<input type="file" id="importFile" accept=".json" style="display:none" onchange="importJson(this)">
+
+<!-- Excel import: mapování sloupců -->
+<div class="modal" id="importModal">
+  <div class="modal-box wide">
+    <div class="modal-head">
+      <h2>📥 Import z Excelu</h2>
+      <button class="modal-x" onclick="closeModal('importModal')">✕</button>
+    </div>
+    <p class="hint">Zkontroluj, který sloupec z tvého souboru odpovídá kterému údaji. Aplikace se pokusila sloupce poznat sama. Co v Excelu nevedeš, nech na „— nemám —" a aplikace si to doplní (kurz/cena podle historického kurzu BTC k datu nákupu). Importované řádky se berou jako nákupy.</p>
     <div class="map-grid" id="mapGrid"></div>
     <p class="hint" id="importPreview"></p>
     <div class="progress" id="importProgress"></div>
-    <div style="display:flex;gap:10px;margin-top:10px;">
+    <div class="modal-foot">
       <button onclick="runImport()" id="btnRunImport">Importovat</button>
-      <button class="ghost" onclick="closeImport()">Zrušit</button>
+      <button class="ghost" onclick="closeModal('importModal')">Zrušit</button>
     </div>
   </div>
 </div>
@@ -299,14 +371,32 @@ let chartBtc, chartValue;
 let remoteUnsub = null;
 let sortDir = 'desc';        // řazení tabulky
 let chartRange = 0;          // 0 = vše, jinak měsíce zpět
+let showAll = false;         // zobrazit všechny řádky vs. prvních 5
+let editingId = null;        // id upravované transakce
+let txType = 'buy';          // typ ve formuláři
+const ROW_LIMIT = 5;
 
 if (window.ChartZoom) { try { Chart.register(window.ChartZoom); } catch (e) {} }
 
 const fmtCzk = n => n == null || isNaN(n) ? '–' : n.toLocaleString('cs-CZ', { style: 'currency', currency: 'CZK', maximumFractionDigits: 0 });
-const fmtBtc = n => n.toLocaleString('cs-CZ', { maximumFractionDigits: 8 }) + ' ₿';
+const fmtBtc = n => (n == null || isNaN(n)) ? '–' : n.toLocaleString('cs-CZ', { maximumFractionDigits: 8 }) + ' ₿';
 const fmtDate = d => new Date(d + 'T00:00:00').toLocaleDateString('cs-CZ');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const toast = msg => { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 3500); };
+const uid = () => 'tx_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+
+// doplní chybějící id/typ u starších záznamů
+function normalize() {
+  for (const p of purchases) {
+    if (!p.id) p.id = uid();
+    if (!p.type) p.type = 'buy';
+  }
+}
+
+/* ---------- modální okna ---------- */
+window.openModal = id => document.getElementById(id).classList.add('open');
+window.closeModal = id => document.getElementById(id).classList.remove('open');
+document.querySelectorAll('.modal').forEach(m => m.addEventListener('mousedown', e => { if (e.target === m) m.classList.remove('open'); }));
 
 /* ---------- Firebase auth + sync ---------- */
 document.addEventListener('fb-auth', e => {
@@ -331,7 +421,6 @@ function subscribeRemote() {
       localStorage.setItem(LS_KEY, JSON.stringify(purchases));
       render();
     } else if (!snap.exists() && purchases.length) {
-      // první přihlášení na zařízení s lokálními daty -> nahraj je
       pushRemote();
     }
   }, err => { console.warn('Firestore:', err); toast('Sync chyba: ' + err.code); });
@@ -385,6 +474,10 @@ function timeTest(dateStr) {
   const days = Math.ceil((free - now) / 86400000);
   return { done: false, text: `zbývá ${days} dní (${free.toLocaleDateString('cs-CZ')})` };
 }
+function freeDate(dateStr) {
+  const free = new Date(dateStr + 'T00:00:00'); free.setFullYear(free.getFullYear() + 3);
+  return free.toISOString().slice(0, 10);
+}
 
 /* ---------- kurzy ---------- */
 async function fetchPrice() {
@@ -395,7 +488,6 @@ async function fetchPrice() {
   render();
 }
 
-// historický kurz CZK/BTC k datu (CoinGecko, cache v localStorage)
 async function histRate(dateStr) {
   if (rateCache[dateStr]) return rateCache[dateStr];
   const [y, m, d] = dateStr.split('-');
@@ -425,7 +517,6 @@ async function enrichMissing() {
       done++;
       btn.textContent = `🪄 Doplňuji… ${done}/${todo.length}`;
       render();
-      // CoinGecko free limit ~ 10 req/min, mezi voláními čekej
       if (!cached) await new Promise(r => setTimeout(r, 2600));
     } catch (e) { failed++; }
   }
@@ -435,56 +526,91 @@ async function enrichMissing() {
   toast(failed ? `Doplněno ${done}, ${failed} se nepovedlo (zkus znovu později — limit API)` : `Doplněno ${done} záznamů ✓`);
 }
 
+/* ---------- výpočty (FIFO pro čisté držené BTC + časový test) ---------- */
+function computeStats() {
+  const txs = [...purchases].sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+  const lots = [];   // držené části: {date, amount, paid}
+  let totalBoughtBtc = 0, totalInvested = 0;
+  let totalSoldBtc = 0, realizedProceeds = 0, soldCostBasis = 0;
+  for (const t of txs) {
+    if (t.type === 'sell') {
+      let toSell = t.amount || 0;
+      totalSoldBtc += toSell;
+      realizedProceeds += t.paid || 0;
+      while (toSell > 1e-12 && lots.length) {
+        const lot = lots[0];
+        const take = Math.min(lot.amount, toSell);
+        const costPer = lot.amount > 0 ? lot.paid / lot.amount : 0;
+        soldCostBasis += take * costPer;
+        lot.amount -= take; lot.paid -= take * costPer; toSell -= take;
+        if (lot.amount <= 1e-12) lots.shift();
+      }
+    } else {
+      totalBoughtBtc += t.amount || 0;
+      totalInvested += t.paid || 0;
+      lots.push({ date: t.date, amount: t.amount || 0, paid: t.paid || 0 });
+    }
+  }
+  const netBtc = lots.reduce((s, l) => s + l.amount, 0);
+  const remainingCost = lots.reduce((s, l) => s + l.paid, 0);
+  const freeBtc = lots.filter(l => timeTest(l.date).done).reduce((s, l) => s + l.amount, 0);
+  return { netBtc, totalBoughtBtc, totalInvested, totalSoldBtc, realizedProceeds, soldCostBasis, remainingCost, freeBtc };
+}
+
 /* ---------- render ---------- */
 function render() {
-  purchases.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
-
-  const totalBtc = purchases.reduce((s, p) => s + (p.amount || 0), 0);
-  const totalPaid = purchases.reduce((s, p) => s + (p.paid || 0), 0);
-  const valueNow = currentPrice ? totalBtc * currentPrice : null;
-  const profit = valueNow != null ? valueNow - totalPaid : null;
-  const avgPrice = totalBtc > 0 ? totalPaid / totalBtc : 0;
-  const freeBtc = purchases.filter(p => timeTest(p.date).done).reduce((s, p) => s + (p.amount || 0), 0);
+  normalize();
+  const s = computeStats();
+  const valueNow = currentPrice != null ? s.netBtc * currentPrice : null;
+  const unrealized = valueNow != null ? valueNow - s.remainingCost : null;
+  const realized = s.realizedProceeds - s.soldCostBasis;
+  const totalPL = valueNow != null ? unrealized + realized : null;
+  const avgPrice = s.totalBoughtBtc > 0 ? s.totalInvested / s.totalBoughtBtc : 0;
 
   document.getElementById('cards').innerHTML = `
-    <div class="card"><div class="ic">₿</div><div class="label">Celkem BTC</div><div class="value">${fmtBtc(totalBtc)}</div>
+    <div class="card"><div class="ic">₿</div><div class="label">Držené BTC</div><div class="value">${fmtBtc(s.netBtc)}</div>
       <div class="sub">prům. nákupní kurz ${fmtCzk(avgPrice)}</div></div>
-    <div class="card"><div class="ic">💸</div><div class="label">Investováno</div><div class="value">${fmtCzk(totalPaid)}</div>
-      <div class="sub">${purchases.length} nákupů</div></div>
+    <div class="card"><div class="ic">💸</div><div class="label">Investováno</div><div class="value">${fmtCzk(s.totalInvested)}</div>
+      <div class="sub">${s.totalSoldBtc > 0 ? 'prodáno ' + fmtBtc(s.totalSoldBtc) + ' za ' + fmtCzk(s.realizedProceeds) : purchases.length + ' transakcí'}</div></div>
     <div class="card"><div class="ic">💎</div><div class="label">Hodnota dnes</div><div class="value">${fmtCzk(valueNow)}</div>
       <div class="sub">kurz ${fmtCzk(currentPrice)} / BTC</div></div>
-    <div class="card"><div class="ic">${profit != null && profit < 0 ? '📉' : '📈'}</div><div class="label">Zisk / ztráta</div>
-      <div class="value ${profit == null ? '' : profit >= 0 ? 'pos' : 'neg'}">${profit != null ? (profit >= 0 ? '+' : '') + fmtCzk(profit) : '–'}</div>
-      <div class="sub">${profit != null && totalPaid > 0 ? ((profit / totalPaid) * 100).toFixed(1) + ' %' : ''}</div></div>
-    <div class="card"><div class="ic">⏳</div><div class="label">Po časovém testu</div><div class="value pos">${fmtBtc(freeBtc)}</div>
+    <div class="card"><div class="ic">${totalPL != null && totalPL < 0 ? '📉' : '📈'}</div><div class="label">Zisk / ztráta</div>
+      <div class="value ${totalPL == null ? '' : totalPL >= 0 ? 'pos' : 'neg'}">${totalPL != null ? (totalPL >= 0 ? '+' : '') + fmtCzk(totalPL) : '–'}</div>
+      <div class="sub">${totalPL != null && s.totalInvested > 0 ? ((totalPL / s.totalInvested) * 100).toFixed(1) + ' %' + (s.totalSoldBtc > 0 ? ' (vč. realiz.)' : '') : ''}</div></div>
+    <div class="card"><div class="ic">⏳</div><div class="label">Po časovém testu</div><div class="value pos">${fmtBtc(s.freeBtc)}</div>
       <div class="sub">lze prodat s 0% daní</div></div>`;
 
-  // pořadí řádků v tabulce dle zvoleného řazení (index do pole purchases zůstává platný)
-  const order = purchases.map((_, i) => i);
-  order.sort((a, b) => {
-    const cmp = (purchases[a].date || '').localeCompare(purchases[b].date || '');
+  // pořadí řádků dle řazení (id stabilní)
+  const order = [...purchases].sort((a, b) => {
+    const cmp = (a.date || '').localeCompare(b.date || '');
     return sortDir === 'desc' ? -cmp : cmp;
   });
+  const shown = showAll ? order : order.slice(0, ROW_LIMIT);
 
-  document.getElementById('rows').innerHTML = order.map(i => {
-    const p = purchases[i];
-    const buyRate = p.amount ? (p.paid || 0) / p.amount : null;
-    const valNow = currentPrice && p.amount ? p.amount * currentPrice : null;
-    const pl = valNow != null ? valNow - (p.paid || 0) : null;
-    const tt = timeTest(p.date);
-    const est = f => f ? ' <span class="badge est">~odhad</span>' : '';
-    return `<tr>
-      <td>${fmtDate(p.date)}</td><td>${esc(p.where) || '–'}</td>
-      <td class="num">${p.amount ? fmtBtc(p.amount) : '?'}${est(p.estAmount)}</td>
+  document.getElementById('rows').innerHTML = shown.map(p => {
+    const rate = p.amount ? (p.paid || 0) / p.amount : null;
+    const isSell = p.type === 'sell';
+    const tt = isSell ? '<span class="badge est">—</span>' : `<span class="badge ${timeTest(p.date).done ? 'ok' : 'wait'}">${timeTest(p.date).text}</span>`;
+    const sign = isSell ? '−' : '';
+    const est = f => f ? ' <span class="badge est">~</span>' : '';
+    return `<tr onclick="openDetail('${p.id}')">
+      <td>${fmtDate(p.date)}</td>
+      <td><span class="badge ${isSell ? 'sell' : 'buy'}">${isSell ? 'Prodej' : 'Nákup'}</span></td>
+      <td>${esc(p.where) || '–'}</td>
+      <td class="num ${isSell ? 'neg' : ''}">${p.amount ? sign + fmtBtc(p.amount) : '?'}${est(p.estAmount)}</td>
       <td class="num">${fmtCzk(p.paid)}${est(p.estPaid)}</td>
-      <td class="num">${fmtCzk(buyRate)}</td>
-      <td class="num">${fmtCzk(valNow)}</td>
-      <td class="num ${pl == null ? '' : pl >= 0 ? 'pos' : 'neg'}">${pl != null ? (pl >= 0 ? '+' : '') + fmtCzk(pl) : '–'}</td>
-      <td><span class="badge ${tt.done ? 'ok' : 'wait'}">${tt.text}</span></td>
-      <td>${esc(p.note)}</td>
-      <td><button class="danger" onclick="del(${i})">smazat</button></td>
+      <td class="num">${fmtCzk(rate)}</td>
+      <td>${tt}</td>
     </tr>`;
   }).join('');
+
+  const more = document.getElementById('moreWrap');
+  if (order.length > ROW_LIMIT) {
+    more.innerHTML = showAll
+      ? `<button class="ghost">Zobrazit méně ▲</button>`
+      : `<button class="ghost">Zobrazit více (${order.length - ROW_LIMIT}) ▼</button>`;
+  } else more.innerHTML = '';
+
   document.getElementById('empty').style.display = purchases.length ? 'none' : 'block';
   renderCharts();
 }
@@ -496,16 +622,16 @@ function rangeMin() {
 }
 
 function renderCharts() {
-  let cum = 0, cumPaid = 0;
-  const btcPts = purchases.map(p => ({ x: p.date, y: +(cum += (p.amount || 0)).toFixed(8) }));
-  const investedPts = purchases.map(p => ({ x: p.date, y: Math.round(cumPaid += (p.paid || 0)) }));
+  const txs = [...purchases].sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+  let cumBtc = 0, cumCash = 0;
+  const btcPts = txs.map(t => ({ x: t.date, y: +(cumBtc += (t.type === 'sell' ? -1 : 1) * (t.amount || 0)).toFixed(8) }));
+  const investedPts = txs.map(t => ({ x: t.date, y: Math.round(cumCash += (t.type === 'sell' ? -1 : 1) * (t.paid || 0)) }));
   const valueNowPts = currentPrice ? btcPts.map(pt => ({ x: pt.x, y: Math.round(pt.y * currentPrice) })) : [];
 
   const xScale = {
     type: 'time',
     time: { unit: 'month', tooltipFormat: 'dd.MM.yyyy', displayFormats: { month: 'MM/yy', day: 'dd.MM' } },
-    min: rangeMin(),
-    max: Date.now(),
+    min: rangeMin(), max: Date.now(),
     ticks: { color: '#8b93a1', maxRotation: 0, autoSkipPadding: 16 },
     grid: { color: 'rgba(255,255,255,.05)' }
   };
@@ -514,21 +640,18 @@ function renderCharts() {
     interaction: { mode: 'index', intersect: false },
     plugins: {
       legend: { labels: { color: '#8b93a1', usePointStyle: true, pointStyleWidth: 8, boxHeight: 6 } },
-      zoom: {
-        pan: { enabled: true, mode: 'x' },
-        zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
-      }
+      zoom: { pan: { enabled: true, mode: 'x' }, zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' } }
     }
   };
 
   chartBtc?.destroy();
   chartBtc = new Chart(document.getElementById('chartBtc'), {
     type: 'line',
-    data: { datasets: [{ label: 'BTC celkem', data: btcPts, unit: 'btc', borderColor: '#f7931a', backgroundColor: 'rgba(247,147,26,.14)', fill: true, tension: .3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2 }] },
+    data: { datasets: [{ label: 'Držené BTC', data: btcPts, borderColor: '#f7931a', backgroundColor: 'rgba(247,147,26,.14)', fill: true, tension: .3, stepped: false, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2 }] },
     options: {
       ...baseOpts,
       scales: { x: xScale, y: { ticks: { color: '#8b93a1' }, grid: { color: 'rgba(255,255,255,.05)' } } },
-      plugins: { ...baseOpts.plugins, tooltip: { callbacks: { label: ctx => 'BTC celkem: ' + fmtBtc(ctx.parsed.y) } } }
+      plugins: { ...baseOpts.plugins, tooltip: { callbacks: { label: ctx => 'Držené BTC: ' + fmtBtc(ctx.parsed.y) } } }
     }
   });
 
@@ -536,8 +659,8 @@ function renderCharts() {
   chartValue = new Chart(document.getElementById('chartValue'), {
     type: 'line',
     data: { datasets: [
-      { label: 'Investováno', data: investedPts, unit: 'czk', borderColor: '#8b93a1', backgroundColor: 'transparent', tension: .3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2 },
-      { label: 'Hodnota dnes', data: valueNowPts, unit: 'czk', borderColor: '#2ecc8f', backgroundColor: 'rgba(46,204,143,.12)', fill: true, tension: .3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2 }
+      { label: 'Investováno (čisté)', data: investedPts, borderColor: '#8b93a1', backgroundColor: 'transparent', tension: .3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2 },
+      { label: 'Hodnota dnes', data: valueNowPts, borderColor: '#2ecc8f', backgroundColor: 'rgba(46,204,143,.12)', fill: true, tension: .3, pointRadius: 2, pointHoverRadius: 5, borderWidth: 2 }
     ]},
     options: {
       ...baseOpts,
@@ -547,7 +670,97 @@ function renderCharts() {
   });
 }
 
-/* ---------- ovládací prvky (řazení, rozsah grafu, zoom) ---------- */
+/* ---------- detail transakce ---------- */
+function openDetail(id) {
+  const p = purchases.find(x => x.id === id);
+  if (!p) return;
+  const isSell = p.type === 'sell';
+  const rate = p.amount ? (p.paid || 0) / p.amount : null;
+  const valNow = currentPrice && p.amount ? p.amount * currentPrice : null;
+  const rows = [];
+  rows.push(['Typ', `<span class="badge ${isSell ? 'sell' : 'buy'}">${isSell ? 'Prodej' : 'Nákup'}</span>`]);
+  rows.push(['Datum', fmtDate(p.date)]);
+  rows.push(['Kde', esc(p.where) || '–']);
+  rows.push(['Množství BTC', (p.amount != null ? fmtBtc(p.amount) : '–') + (p.estAmount ? ' <span class="badge est">~odhad</span>' : '')]);
+  rows.push([isSell ? 'Získáno' : 'Zaplaceno', fmtCzk(p.paid) + (p.estPaid ? ' <span class="badge est">~odhad</span>' : '')]);
+  rows.push(['Kurz při transakci', fmtCzk(rate)]);
+  rows.push([isSell ? 'Hodnota těchto BTC dnes' : 'Hodnota dnes', fmtCzk(valNow)]);
+  if (!isSell && valNow != null) {
+    const pl = valNow - (p.paid || 0);
+    rows.push(['Nerealizovaný zisk/ztráta', `<span class="${pl >= 0 ? 'pos' : 'neg'}">${(pl >= 0 ? '+' : '') + fmtCzk(pl)}</span>`]);
+  }
+  if (!isSell) {
+    const tt = timeTest(p.date);
+    rows.push(['Časový test', `<span class="badge ${tt.done ? 'ok' : 'wait'}">${tt.text}</span>`]);
+    rows.push(['Osvobozeno od daně dne', fmtDate(freeDate(p.date))]);
+  }
+  if (p.note) rows.push(['Poznámka', esc(p.note)]);
+  if (p.imported) rows.push(['Původ', 'import z Excelu']);
+  document.getElementById('detailBody').innerHTML = rows.map(([k, v]) => `<div class="detail-row"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+  document.getElementById('detailEdit').onclick = () => { closeModal('detailModal'); openEdit(id); };
+  document.getElementById('detailDel').onclick = () => {
+    if (confirm('Opravdu smazat tuto transakci?')) {
+      const i = purchases.findIndex(x => x.id === id);
+      if (i >= 0) { purchases.splice(i, 1); save(); render(); }
+      closeModal('detailModal');
+    }
+  };
+  openModal('detailModal');
+}
+
+/* ---------- přidat / upravit ---------- */
+function setTxType(t) {
+  txType = t;
+  [...document.getElementById('txTypeSeg').children].forEach(b => b.classList.toggle('active', b.dataset.type === t));
+  document.getElementById('paidLabel').textContent = t === 'sell' ? 'Získáno (CZK)' : 'Zaplaceno (CZK)';
+}
+function openAdd() {
+  editingId = null;
+  document.getElementById('txForm').reset();
+  setTxType('buy');
+  dpSetValue(new Date().toISOString().slice(0, 10));
+  document.getElementById('txTitle').textContent = 'Nová transakce';
+  document.getElementById('txSubmit').textContent = 'Přidat';
+  openModal('txModal');
+}
+function openEdit(id) {
+  const p = purchases.find(x => x.id === id);
+  if (!p) return;
+  editingId = id;
+  setTxType(p.type === 'sell' ? 'sell' : 'buy');
+  dpSetValue(p.date);
+  document.getElementById('fAmount').value = p.amount ?? '';
+  document.getElementById('fPaid').value = p.paid ?? '';
+  document.getElementById('fWhere').value = p.where || '';
+  document.getElementById('fNote').value = p.note || '';
+  document.getElementById('txTitle').textContent = 'Upravit transakci';
+  document.getElementById('txSubmit').textContent = 'Uložit';
+  openModal('txModal');
+}
+document.getElementById('txTypeSeg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (b) setTxType(b.dataset.type);
+});
+document.getElementById('txForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const amount = parseFloat(document.getElementById('fAmount').value);
+  const paid = parseFloat(document.getElementById('fPaid').value);
+  const where = document.getElementById('fWhere').value.trim();
+  const note = document.getElementById('fNote').value.trim();
+  if (editingId) {
+    const p = purchases.find(x => x.id === editingId);
+    if (p) {
+      if (amount !== p.amount) p.estAmount = false;
+      if (paid !== p.paid) p.estPaid = false;
+      p.type = txType; p.date = dpValue; p.amount = amount; p.paid = paid; p.where = where; p.note = note;
+    }
+  } else {
+    purchases.push({ id: uid(), type: txType, date: dpValue, amount, paid, where, note });
+  }
+  save(); render();
+  closeModal('txModal');
+});
+
+/* ---------- ovládací prvky ---------- */
 document.getElementById('sortSeg').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   sortDir = b.dataset.sort;
@@ -560,9 +773,8 @@ document.getElementById('rangeSeg').addEventListener('click', e => {
   [...e.currentTarget.children].forEach(c => c.classList.toggle('active', c === b));
   renderCharts();
 });
-document.getElementById('resetZoom').addEventListener('click', () => {
-  chartBtc?.resetZoom(); chartValue?.resetZoom();
-});
+document.getElementById('resetZoom').addEventListener('click', () => { chartBtc?.resetZoom(); chartValue?.resetZoom(); });
+document.getElementById('moreWrap').addEventListener('click', e => { if (e.target.closest('button')) { showAll = !showAll; render(); } });
 
 /* ---------- vlastní kalendář (datepicker) ---------- */
 const DP_MONTHS = ['leden','únor','březen','duben','květen','červen','červenec','srpen','září','říjen','listopad','prosinec'];
@@ -577,7 +789,7 @@ function dpSetValue(iso) {
 function dpBuild() {
   const pop = document.getElementById('dpPop');
   const first = new Date(dpView.y, dpView.m, 1);
-  const startWd = (first.getDay() + 6) % 7;            // Po=0
+  const startWd = (first.getDay() + 6) % 7;
   const daysIn = new Date(dpView.y, dpView.m + 1, 0).getDate();
   const prevDays = new Date(dpView.y, dpView.m, 0).getDate();
   const todayIso = new Date().toISOString().slice(0, 10);
@@ -610,8 +822,7 @@ function dpClose() { document.getElementById('dpPop').classList.remove('open'); 
 
 document.getElementById('dpInput').addEventListener('click', e => {
   e.stopPropagation();
-  const open = document.getElementById('dpPop').classList.contains('open');
-  open ? dpClose() : dpOpen();
+  document.getElementById('dpPop').classList.contains('open') ? dpClose() : dpOpen();
 });
 document.getElementById('dpPop').addEventListener('click', e => {
   e.stopPropagation();
@@ -623,24 +834,6 @@ document.getElementById('dpPop').addEventListener('click', e => {
   if (day) { dpSetValue(day.dataset.iso); dpClose(); }
 });
 document.addEventListener('click', () => dpClose());
-
-/* ---------- přidání / mazání ---------- */
-document.getElementById('addForm').addEventListener('submit', e => {
-  e.preventDefault();
-  purchases.push({
-    date: dpValue,
-    amount: parseFloat(document.getElementById('fAmount').value),
-    paid: parseFloat(document.getElementById('fPaid').value),
-    where: document.getElementById('fWhere').value.trim(),
-    note: document.getElementById('fNote').value.trim()
-  });
-  save(); render();
-  e.target.reset();
-  dpSetValue(new Date().toISOString().slice(0, 10));
-});
-function del(i) {
-  if (confirm('Opravdu smazat tento nákup?')) { purchases.splice(i, 1); save(); render(); }
-}
 
 /* ---------- Excel import ---------- */
 let importRows = [], importHeaders = [];
@@ -674,25 +867,24 @@ function openImport(input) {
     document.getElementById('importPreview').textContent =
       `Nalezeno ${importRows.length} řádků. První řádek: ${importRows[0].slice(0, 6).join(' | ')}`;
     document.getElementById('importProgress').textContent = '';
-    document.getElementById('importModal').style.display = 'flex';
+    openModal('importModal');
   };
   reader.readAsArrayBuffer(file);
   input.value = '';
 }
-function closeImport() { document.getElementById('importModal').style.display = 'none'; }
 
 function parseDateCell(v) {
   if (v instanceof Date) return v.toISOString().slice(0, 10);
-  if (typeof v === 'number') { // excel serial
+  if (typeof v === 'number') {
     const d = new Date(Math.round((v - 25569) * 86400000));
     return d.toISOString().slice(0, 10);
   }
   const s = String(v).trim();
-  let m = s.match(/^(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})/);          // 5. 1. 2024
+  let m = s.match(/^(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})/);
   if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
-  m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);                          // 2024-01-05
+  m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (m) return `${m[1]}-${m[2]}-${m[3]}`;
-  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);                    // 5/1/2024 (d/m/r)
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
   if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
   return null;
 }
@@ -717,14 +909,14 @@ async function runImport() {
     const date = parseDateCell(r[col.date]);
     if (!date) { skipped++; continue; }
     const rec = {
-      date,
+      id: uid(), type: 'buy', date,
       amount: col.amount >= 0 ? parseNum(r[col.amount]) : null,
       paid: col.paid >= 0 ? parseNum(r[col.paid]) : null,
       where: col.where >= 0 ? String(r[col.where]).trim() : '',
       note: col.note >= 0 ? String(r[col.note]).trim() : '',
       imported: true
     };
-    if (purchases.some(p => p.date === rec.date && p.amount === rec.amount && p.paid === rec.paid)) { skipped++; continue; }
+    if (purchases.some(p => p.date === rec.date && p.amount === rec.amount && p.paid === rec.paid && (p.type || 'buy') === 'buy')) { skipped++; continue; }
     if ((!rec.paid && rec.amount) || (!rec.amount && rec.paid)) {
       prog.textContent = `Řádek ${i + 1}/${importRows.length} — stahuji historický kurz k ${fmtDate(date)}…`;
       try {
@@ -733,7 +925,7 @@ async function runImport() {
         if (!rec.paid) { rec.paid = Math.round(rec.amount * rate); rec.estPaid = true; }
         else { rec.amount = +(rec.paid / rate).toFixed(8); rec.estAmount = true; }
         enriched++;
-        if (!cached) await new Promise(r => setTimeout(r, 2600)); // limit free API
+        if (!cached) await new Promise(r => setTimeout(r, 2600));
       } catch { enrichFail++; }
     }
     purchases.push(rec);
@@ -743,7 +935,7 @@ async function runImport() {
 
   save(); render();
   document.getElementById('btnRunImport').disabled = false;
-  closeImport();
+  closeModal('importModal');
   let msg = `Import hotov: ${added} přidáno`;
   if (skipped) msg += `, ${skipped} přeskočeno (duplicity/bez data)`;
   if (enriched) msg += `, ${enriched} doplněno kurzem`;
@@ -753,14 +945,15 @@ async function runImport() {
 
 /* ---------- export / záloha ---------- */
 function exportCsv() {
-  const head = 'Datum;Misto;Mnozstvi BTC;Zaplaceno CZK;Kurz pri nakupu CZK/BTC;Casovy test splnen dne;Odhad;Poznamka\n';
-  const body = purchases.map(p => {
-    const free = new Date(p.date + 'T00:00:00'); free.setFullYear(free.getFullYear() + 3);
-    return [p.date, p.where || '', String(p.amount ?? '').replace('.', ','), String(p.paid ?? '').replace('.', ','),
+  const head = 'Typ;Datum;Misto;Mnozstvi BTC;Castka CZK;Kurz CZK/BTC;Casovy test splnen dne;Odhad;Poznamka\n';
+  const body = [...purchases].sort((a, b) => (a.date || '').localeCompare(b.date || '')).map(p => {
+    const isSell = p.type === 'sell';
+    return [isSell ? 'prodej' : 'nakup', p.date, p.where || '',
+      String(p.amount ?? '').replace('.', ','), String(p.paid ?? '').replace('.', ','),
       p.amount && p.paid ? String((p.paid / p.amount).toFixed(2)).replace('.', ',') : '',
-      free.toISOString().slice(0, 10), (p.estPaid || p.estAmount) ? 'ano' : '', p.note || ''].join(';');
+      isSell ? '' : freeDate(p.date), (p.estPaid || p.estAmount) ? 'ano' : '', p.note || ''].join(';');
   }).join('\n');
-  download('btc-nakupy.csv', '﻿' + head + body, 'text/csv');
+  download('btc-transakce.csv', '﻿' + head + body, 'text/csv');
 }
 function exportJson() { download('btc-zaloha.json', JSON.stringify(purchases, null, 2), 'application/json'); }
 function importJson(input) {
@@ -771,7 +964,7 @@ function importJson(input) {
     try {
       const data = JSON.parse(reader.result);
       if (!Array.isArray(data)) throw new Error();
-      purchases = data; save(); render();
+      purchases = data; normalize(); save(); render();
       toast('Záloha obnovena ✓');
     } catch { toast('Neplatný soubor zálohy.'); }
   };
