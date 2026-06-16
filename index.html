@@ -159,6 +159,12 @@
   .detail-row .k { color: var(--muted); }
   .detail-row .v { font-weight: 600; text-align: right; }
 
+  .exch-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,.06); font-size: .88rem; }
+  .exch-row:last-child { border-bottom: none; }
+  .exch-row .nm { flex: 1; font-weight: 600; }
+  .exch-row .fee { color: var(--muted); font-size: .8rem; }
+  .exch-row button.danger { padding: 4px 9px; font-size: .75rem; }
+
   /* settings menu */
   .menu-list { display: flex; flex-direction: column; gap: 10px; }
   .menu-list button { width: 100%; text-align: left; }
@@ -295,9 +301,27 @@
           </div>
         </div>
         <div><label>Množství BTC</label><input type="number" id="fAmount" step="any" min="0" placeholder="0.001" required></div>
-        <div><label id="paidLabel">Zaplaceno (CZK)</label><input type="number" id="fPaid" step="any" min="0" placeholder="2500" required></div>
-        <div><label>Kde (burza/směnárna)</label><input type="text" id="fWhere" placeholder="Coinbase, Anycoin…"></div>
-        <div><label>Poznámka</label><input type="text" id="fNote" placeholder="volitelné"></div>
+        <div><label>Kde (burza/směnárna)</label><select id="fWhere"></select></div>
+        <div class="full">
+          <label id="paidLabel">Zaplaceno (Kč)</label>
+          <div style="display:flex;gap:8px;align-items:stretch;">
+            <input type="number" id="fPaid" step="any" min="0" placeholder="2500" required style="flex:1;">
+            <div class="seg" id="ccySeg" style="flex:none;">
+              <button type="button" data-ccy="CZK" class="active">Kč</button>
+              <button type="button" data-ccy="EUR">€</button>
+            </div>
+          </div>
+          <div class="hint" id="feeNote" style="margin-bottom:0;"></div>
+        </div>
+        <div class="full" id="rateWrap" style="display:none;">
+          <label>Kurz ČNB CZK/€ k <span id="rateDateLbl">—</span></label>
+          <div style="display:flex;gap:8px;">
+            <input type="number" id="fRate" step="any" min="0" placeholder="např. 25,10" style="flex:1;">
+            <button type="button" class="ghost" id="rateFetch" style="flex:none;">↻ načíst</button>
+          </div>
+          <div class="hint" id="rateHint" style="margin-bottom:0;"></div>
+        </div>
+        <div class="full"><label>Poznámka</label><input type="text" id="fNote" placeholder="volitelné"></div>
       </div>
       <div class="modal-foot">
         <button type="submit" id="txSubmit">Přidat</button>
@@ -336,6 +360,15 @@
       <button class="ghost" onclick="closeModal('settingsModal');document.getElementById('importFile').click()">⬆ Obnovit ze zálohy JSON</button>
       <button class="ghost" onclick="closeModal('settingsModal');enrichMissing()" id="btnEnrich">🪄 Doplnit chybějící údaje</button>
     </div>
+
+    <h2 style="font-size:.92rem;margin:22px 0 8px;">🏦 Burzy / směnárny</h2>
+    <p class="hint" style="margin-top:0;">Volby v rozbalovátku „Kde". Poplatek v € se u nákupu placeného v eurech automaticky připočte k ceně (např. SEPA převod na Binance).</p>
+    <div id="exchList"></div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <input type="text" id="newExchName" placeholder="Název burzy" style="flex:1;">
+      <input type="number" id="newExchFee" placeholder="€ fee" step="any" min="0" style="width:90px;">
+      <button class="ghost" id="addExchBtn" style="flex:none;">Přidat</button>
+    </div>
   </div>
 </div>
 <input type="file" id="xlsFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="openImport(this)">
@@ -364,8 +397,12 @@
 <script>
 const LS_KEY = 'btc-purchases-v1';
 const RATE_CACHE_KEY = 'btc-hist-rates-v1';
+const EUR_CACHE_KEY = 'cnb-eur-rates-v1';
+const EXCH_KEY = 'btc-exchanges-v1';
 let purchases = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
 let rateCache = JSON.parse(localStorage.getItem(RATE_CACHE_KEY) || '{}'); // 'YYYY-MM-DD' -> CZK/BTC
+let eurCache = JSON.parse(localStorage.getItem(EUR_CACHE_KEY) || '{}');    // 'YYYY-MM-DD' -> CZK/EUR (ČNB)
+let exchanges = JSON.parse(localStorage.getItem(EXCH_KEY) || 'null') || [{ name: 'Binance', feeEur: 1 }, { name: 'Anycoin', feeEur: 0 }];
 let currentPrice = null;
 let chartBtc, chartValue;
 let remoteUnsub = null;
@@ -374,6 +411,7 @@ let chartRange = 0;          // 0 = vše, jinak měsíce zpět
 let showAll = false;         // zobrazit všechny řádky vs. prvních 5
 let editingId = null;        // id upravované transakce
 let txType = 'buy';          // typ ve formuláři
+let txCcy = 'CZK';           // měna pole Zaplaceno ve formuláři
 const ROW_LIMIT = 5;
 
 if (window.ChartZoom) { try { Chart.register(window.ChartZoom); } catch (e) {} }
@@ -416,11 +454,16 @@ function subscribeRemote() {
   remoteUnsub = window._fbFns.onSnapshot(docRef(), snap => {
     if (snap.metadata.hasPendingWrites) return;
     const data = snap.data();
+    if (data && Array.isArray(data.exchanges)) {
+      exchanges = data.exchanges;
+      localStorage.setItem(EXCH_KEY, JSON.stringify(exchanges));
+      populateWhere(); renderExchanges();
+    }
     if (data && Array.isArray(data.purchases)) {
       purchases = data.purchases;
       localStorage.setItem(LS_KEY, JSON.stringify(purchases));
       render();
-    } else if (!snap.exists() && purchases.length) {
+    } else if (!snap.exists() && (purchases.length || exchanges.length)) {
       pushRemote();
     }
   }, err => { console.warn('Firestore:', err); toast('Sync chyba: ' + err.code); });
@@ -428,8 +471,12 @@ function subscribeRemote() {
 
 function pushRemote() {
   if (!window._fbUser) return;
-  window._fbFns.setDoc(docRef(), { purchases, savedAt: new Date().toISOString() })
+  window._fbFns.setDoc(docRef(), { purchases, exchanges, savedAt: new Date().toISOString() })
     .catch(err => toast('Uložení do cloudu selhalo: ' + err.code));
+}
+function saveExchanges() {
+  localStorage.setItem(EXCH_KEY, JSON.stringify(exchanges));
+  pushRemote();
 }
 
 function save() {
@@ -499,6 +546,27 @@ async function histRate(dateStr) {
   rateCache[dateStr] = rate;
   localStorage.setItem(RATE_CACHE_KEY, JSON.stringify(rateCache));
   return rate;
+}
+
+// kurz CZK/EUR k datu z ČNB (s posunem zpět přes víkendy/svátky, cache v localStorage)
+async function cnbEurRate(dateStr) {
+  if (eurCache[dateStr]) return eurCache[dateStr];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(dateStr + 'T00:00:00'); d.setDate(d.getDate() - i);
+    const iso = d.toISOString().slice(0, 10);
+    if (eurCache[iso]) { eurCache[dateStr] = eurCache[iso]; return eurCache[iso]; }
+    const r = await fetch(`https://api.cnb.cz/cnbapi/exrates/daily?date=${iso}&lang=EN`);
+    if (!r.ok) continue;
+    const j = await r.json();
+    const row = (j.rates || []).find(x => x.currencyCode === 'EUR');
+    if (row) {
+      const rate = row.rate / (row.amount || 1);
+      eurCache[dateStr] = rate; eurCache[iso] = rate;
+      localStorage.setItem(EUR_CACHE_KEY, JSON.stringify(eurCache));
+      return rate;
+    }
+  }
+  throw new Error('kurz ČNB nenalezen');
 }
 
 /* ---------- doplnění chybějících údajů ---------- */
@@ -682,7 +750,12 @@ function openDetail(id) {
   rows.push(['Datum', fmtDate(p.date)]);
   rows.push(['Kde', esc(p.where) || '–']);
   rows.push(['Množství BTC', (p.amount != null ? fmtBtc(p.amount) : '–') + (p.estAmount ? ' <span class="badge est">~odhad</span>' : '')]);
-  rows.push([isSell ? 'Získáno' : 'Zaplaceno', fmtCzk(p.paid) + (p.estPaid ? ' <span class="badge est">~odhad</span>' : '')]);
+  let paidStr = fmtCzk(p.paid) + (p.estPaid ? ' <span class="badge est">~odhad</span>' : '');
+  if (p.inputCcy === 'EUR' && p.eurRate) {
+    const feeTxt = p.feeEur ? ` + ${p.feeEur} € poplatek` : '';
+    paidStr = `${fmtCzk(p.paid)} <span style="color:var(--muted);font-size:.82rem;">(${(p.inputAmount ?? 0).toLocaleString('cs-CZ')} €${feeTxt} × ${p.eurRate} ČNB)</span>`;
+  }
+  rows.push([isSell ? 'Získáno' : 'Zaplaceno', paidStr]);
   rows.push(['Kurz při transakci', fmtCzk(rate)]);
   rows.push([isSell ? 'Hodnota těchto BTC dnes' : 'Hodnota dnes', fmtCzk(valNow)]);
   if (!isSell && valNow != null) {
@@ -708,17 +781,85 @@ function openDetail(id) {
   openModal('detailModal');
 }
 
+/* ---------- burzy / směnárny ---------- */
+function populateWhere(selected) {
+  const sel = document.getElementById('fWhere');
+  const cur = selected != null ? selected : sel.value;
+  const names = exchanges.map(e => e.name);
+  if (cur && !names.includes(cur)) names.push(cur);
+  sel.innerHTML = names.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  if (cur) sel.value = cur;
+}
+function renderExchanges() {
+  const box = document.getElementById('exchList');
+  if (!box) return;
+  box.innerHTML = exchanges.map((e, i) =>
+    `<div class="exch-row"><span class="nm">${esc(e.name)}</span><span class="fee">${e.feeEur ? '+' + e.feeEur + ' € fee' : 'bez fee'}</span><button class="danger" data-rmex="${i}">✕</button></div>`
+  ).join('') || '<p class="hint">Zatím žádné burzy.</p>';
+}
+document.getElementById('exchList').addEventListener('click', e => {
+  const b = e.target.closest('[data-rmex]'); if (!b) return;
+  exchanges.splice(+b.dataset.rmex, 1);
+  saveExchanges(); renderExchanges(); populateWhere();
+});
+document.getElementById('addExchBtn').addEventListener('click', () => {
+  const name = document.getElementById('newExchName').value.trim();
+  const fee = parseFloat(document.getElementById('newExchFee').value) || 0;
+  if (!name) { toast('Zadej název burzy.'); return; }
+  if (exchanges.some(x => x.name.toLowerCase() === name.toLowerCase())) { toast('Tato burza už existuje.'); return; }
+  exchanges.push({ name, feeEur: fee });
+  saveExchanges(); renderExchanges(); populateWhere();
+  document.getElementById('newExchName').value = ''; document.getElementById('newExchFee').value = '';
+});
+
+/* ---------- měna a kurz ČNB ve formuláři ---------- */
+function setCcy(c) {
+  txCcy = c;
+  [...document.getElementById('ccySeg').children].forEach(b => b.classList.toggle('active', b.dataset.ccy === c));
+  const sell = txType === 'sell';
+  document.getElementById('paidLabel').textContent = (sell ? 'Získáno' : 'Zaplaceno') + (c === 'EUR' ? ' (€)' : ' (Kč)');
+  document.getElementById('rateWrap').style.display = c === 'EUR' ? 'block' : 'none';
+  updateFeeNote();
+  if (c === 'EUR') maybeFetchRate();
+}
+function updateFeeNote() {
+  const ex = exchanges.find(e => e.name === document.getElementById('fWhere').value);
+  const note = document.getElementById('feeNote');
+  note.textContent = (txCcy === 'EUR' && ex && ex.feeEur > 0)
+    ? `K ceně se automaticky připočte poplatek ${ex.feeEur} € (např. SEPA převod).` : '';
+}
+async function maybeFetchRate(force) {
+  if (txCcy !== 'EUR') return;
+  document.getElementById('rateDateLbl').textContent = fmtDate(dpValue);
+  const hint = document.getElementById('rateHint');
+  const fld = document.getElementById('fRate');
+  if (!force && fld.value) return;
+  if (eurCache[dpValue]) { fld.value = eurCache[dpValue]; hint.textContent = `Kurz ČNB k ${fmtDate(dpValue)}: ${eurCache[dpValue]} Kč/€`; return; }
+  hint.textContent = 'Načítám kurz ČNB…';
+  try {
+    const rate = await cnbEurRate(dpValue);
+    fld.value = rate;
+    hint.textContent = `Kurz ČNB k ${fmtDate(dpValue)}: ${rate} Kč/€`;
+  } catch (e) {
+    hint.textContent = 'Kurz ČNB se nepodařilo načíst – zadej ho ručně (z cnb.cz).';
+  }
+}
+
 /* ---------- přidat / upravit ---------- */
 function setTxType(t) {
   txType = t;
   [...document.getElementById('txTypeSeg').children].forEach(b => b.classList.toggle('active', b.dataset.type === t));
-  document.getElementById('paidLabel').textContent = t === 'sell' ? 'Získáno (CZK)' : 'Zaplaceno (CZK)';
+  const sell = t === 'sell';
+  document.getElementById('paidLabel').textContent = (sell ? 'Získáno' : 'Zaplaceno') + (txCcy === 'EUR' ? ' (€)' : ' (Kč)');
 }
 function openAdd() {
   editingId = null;
   document.getElementById('txForm').reset();
   setTxType('buy');
+  populateWhere(exchanges[0] ? exchanges[0].name : '');
   dpSetValue(new Date().toISOString().slice(0, 10));
+  document.getElementById('fRate').value = '';
+  setCcy('CZK');
   document.getElementById('txTitle').textContent = 'Nová transakce';
   document.getElementById('txSubmit').textContent = 'Přidat';
   openModal('txModal');
@@ -728,11 +869,14 @@ function openEdit(id) {
   if (!p) return;
   editingId = id;
   setTxType(p.type === 'sell' ? 'sell' : 'buy');
+  populateWhere(p.where || '');
   dpSetValue(p.date);
   document.getElementById('fAmount').value = p.amount ?? '';
-  document.getElementById('fPaid').value = p.paid ?? '';
-  document.getElementById('fWhere').value = p.where || '';
   document.getElementById('fNote').value = p.note || '';
+  const ccy = p.inputCcy === 'EUR' ? 'EUR' : 'CZK';
+  document.getElementById('fPaid').value = ccy === 'EUR' ? (p.inputAmount ?? '') : (p.paid ?? '');
+  document.getElementById('fRate').value = p.eurRate ?? '';
+  setCcy(ccy);
   document.getElementById('txTitle').textContent = 'Upravit transakci';
   document.getElementById('txSubmit').textContent = 'Uložit';
   openModal('txModal');
@@ -740,21 +884,37 @@ function openEdit(id) {
 document.getElementById('txTypeSeg').addEventListener('click', e => {
   const b = e.target.closest('button'); if (b) setTxType(b.dataset.type);
 });
+document.getElementById('ccySeg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (b) setCcy(b.dataset.ccy);
+});
+document.getElementById('rateFetch').addEventListener('click', () => maybeFetchRate(true));
+document.getElementById('fWhere').addEventListener('change', updateFeeNote);
 document.getElementById('txForm').addEventListener('submit', e => {
   e.preventDefault();
   const amount = parseFloat(document.getElementById('fAmount').value);
-  const paid = parseFloat(document.getElementById('fPaid').value);
-  const where = document.getElementById('fWhere').value.trim();
+  const where = document.getElementById('fWhere').value;
   const note = document.getElementById('fNote').value.trim();
+  const rawPaid = parseFloat(document.getElementById('fPaid').value);
+  let paidCzk, eurRate = null, feeEur = 0;
+  if (txCcy === 'EUR') {
+    eurRate = parseFloat(String(document.getElementById('fRate').value).replace(',', '.'));
+    if (!eurRate || eurRate <= 0) { toast('Zadej platný kurz ČNB CZK/€.'); return; }
+    const ex = exchanges.find(x => x.name === where);
+    feeEur = ex && ex.feeEur > 0 ? ex.feeEur : 0;
+    paidCzk = Math.round((rawPaid + feeEur) * eurRate);
+  } else {
+    paidCzk = rawPaid;
+  }
+  const base = {
+    type: txType, date: dpValue, amount, paid: paidCzk, where, note,
+    inputCcy: txCcy, inputAmount: txCcy === 'EUR' ? rawPaid : null, eurRate, feeEur,
+    estAmount: false, estPaid: false
+  };
   if (editingId) {
     const p = purchases.find(x => x.id === editingId);
-    if (p) {
-      if (amount !== p.amount) p.estAmount = false;
-      if (paid !== p.paid) p.estPaid = false;
-      p.type = txType; p.date = dpValue; p.amount = amount; p.paid = paid; p.where = where; p.note = note;
-    }
+    if (p) Object.assign(p, base);
   } else {
-    purchases.push({ id: uid(), type: txType, date: dpValue, amount, paid, where, note });
+    purchases.push({ id: uid(), ...base });
   }
   save(); render();
   closeModal('txModal');
@@ -828,10 +988,10 @@ document.getElementById('dpPop').addEventListener('click', e => {
   e.stopPropagation();
   const nav = e.target.closest('[data-nav]');
   if (nav) { dpView.m += +nav.dataset.nav; if (dpView.m < 0) { dpView.m = 11; dpView.y--; } if (dpView.m > 11) { dpView.m = 0; dpView.y++; } dpBuild(); return; }
-  if (e.target.dataset.today) { dpSetValue(new Date().toISOString().slice(0, 10)); dpClose(); return; }
+  if (e.target.dataset.today) { dpSetValue(new Date().toISOString().slice(0, 10)); dpClose(); maybeFetchRate(true); return; }
   if (e.target.dataset.close) { dpClose(); return; }
   const day = e.target.closest('.dp-day[data-iso]');
-  if (day) { dpSetValue(day.dataset.iso); dpClose(); }
+  if (day) { dpSetValue(day.dataset.iso); dpClose(); maybeFetchRate(true); }
 });
 document.addEventListener('click', () => dpClose());
 
@@ -945,13 +1105,14 @@ async function runImport() {
 
 /* ---------- export / záloha ---------- */
 function exportCsv() {
-  const head = 'Typ;Datum;Misto;Mnozstvi BTC;Castka CZK;Kurz CZK/BTC;Casovy test splnen dne;Odhad;Poznamka\n';
+  const head = 'Typ;Datum;Misto;Mnozstvi BTC;Castka CZK;Kurz CZK/BTC;Casovy test splnen dne;Odhad;Mena vstupu;Kurz CNB CZK/EUR;Poznamka\n';
   const body = [...purchases].sort((a, b) => (a.date || '').localeCompare(b.date || '')).map(p => {
     const isSell = p.type === 'sell';
     return [isSell ? 'prodej' : 'nakup', p.date, p.where || '',
       String(p.amount ?? '').replace('.', ','), String(p.paid ?? '').replace('.', ','),
       p.amount && p.paid ? String((p.paid / p.amount).toFixed(2)).replace('.', ',') : '',
-      isSell ? '' : freeDate(p.date), (p.estPaid || p.estAmount) ? 'ano' : '', p.note || ''].join(';');
+      isSell ? '' : freeDate(p.date), (p.estPaid || p.estAmount) ? 'ano' : '',
+      p.inputCcy || 'CZK', p.eurRate ? String(p.eurRate).replace('.', ',') : '', p.note || ''].join(';');
   }).join('\n');
   download('btc-transakce.csv', '﻿' + head + body, 'text/csv');
 }
@@ -980,6 +1141,8 @@ function download(name, content, type) {
 
 /* ---------- start ---------- */
 dpSetValue(new Date().toISOString().slice(0, 10));
+populateWhere(exchanges[0] ? exchanges[0].name : '');
+renderExchanges();
 render();
 fetchPrice();
 setInterval(fetchPrice, 5 * 60 * 1000);
